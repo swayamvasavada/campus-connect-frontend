@@ -1,0 +1,96 @@
+:root {
+    --color-background: white;
+    --color-text: black;
+}
+
+body {
+    background-color: #1c1c1c;
+}
+
+main {
+    background-color: var(--color-background);
+    margin: 1rem 3rem;
+    min-width: 80%;
+}
+
+button {
+    background-color: transparent;
+    border: none;
+}
+
+.card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn {
+    padding: 0.25rem 0.5rem;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    color: var(--color-background);
+    background-color: rgb(37, 115, 242);
+    border: none;
+}
+
+.btn:hover {
+    background-color: rgb(18, 83, 187);
+    cursor: pointer;
+}
+
+.btn-alt {
+    color: rgb(37, 115, 242);
+}
+
+.btn-alt {
+    text-decoration: none;
+}
+
+.btn-alt:hover {
+    color: rgb(5, 58, 144);
+}
+
+.info-message {
+    margin: 0 0 0.5rem 0;
+}
+
+.card .image-container img {
+    width: 40vw;
+    height: 70vh;
+    object-fit: cover;
+}
+
+.card .form-container,
+.card .message {
+    min-width: 40vw;
+    margin: 1rem;
+    padding: 0 2rem;
+}
+
+.form-alt {
+    padding: 0 0.5rem; 
+    margin: 0 1rem;
+}
+
+.input-container {
+    padding: 0.5rem 0;
+}
+
+.input-container label {
+    display: block;
+    font-weight: bold;
+    margin: 0.25rem 0;
+}
+
+.input-container input {
+    width: 90%;
+    padding: 0.25rem;
+}
+
+.input-container input:focus {
+    background-color: rgb(238, 238, 238);
+}
+
+.form-action {
+    margin: 2rem 0;
+}
