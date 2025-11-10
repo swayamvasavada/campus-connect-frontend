@@ -55,7 +55,7 @@ export default function Signup() {
 
             localStorage.setItem("isAuth", true);
             localStorage.setItem("authToken", result.token);
-            localStorage.setItem("user", result.user);
+            localStorage.setItem("user", JSON.stringify(result.user));
             navigate('/');
         } catch (error) {
             setError(true);
