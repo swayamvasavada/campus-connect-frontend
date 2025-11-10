@@ -16,8 +16,8 @@ export default function RequestActivation() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'authorization': `Bearer ${localStorage.getItem('authToken')}`
-                }
+                },
+                body: JSON.stringify({ token: localStorage.getItem('authToken') })
             });
 
             const result = await res.json();
