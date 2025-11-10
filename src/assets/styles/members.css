@@ -1,0 +1,123 @@
+.members-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #444;
+    background-color: #333;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #555;
+    object-fit: cover;
+}
+
+.member-details h4 {
+    margin: 0;
+    color: #f1f1f1;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.moderator-badge {
+    background-color: #2dd4bf;
+    color: #111827;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.member-details p {
+    margin: 0;
+    color: #a1a1aa;
+    font-size: 0.85rem;
+}
+
+.member-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.promote-btn {
+    color: #2dd4bf;
+    border: 1px solid #2dd4bf20;
+}
+
+.promote-btn:hover {
+    background-color: #2dd4bf20;
+}
+
+.demote-btn {
+    color: #fbbf24;
+    /* Amber for demote */
+    border: 1px solid #fbbf2420;
+}
+
+.demote-btn:hover {
+    background-color: #fbbf2420;
+}
+
+.remove-btn {
+    color: #ef4444;
+    border: 1px solid #ef444420;
+}
+
+.remove-btn:hover {
+    background-color: #ef444420;
+}
+
+.view-members-btn {
+    background-color: transparent;
+    color: #f1f1f1;
+    border: 1px solid #444;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.view-members-btn:hover {
+    background-color: #333;
+    border-color: #666;
+}
