@@ -22,6 +22,8 @@ import MyProjects from "./Pages/Project/MyProjects";
 import ProjectDetailPage from "./Pages/Project/ProjectDetailPage";
 
 import NotFound from "./Pages/NotFound";
+import Dashboard from "./Pages/Dashboard";
+import ComingSoon from "./Pages/Placeholder/ComingSoon";
 
 
 function App() {
@@ -37,7 +39,7 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />} >
-            <Route path="/" element={<></>} />
+            <Route path="/" element={<Dashboard />} />
             
             <Route path="/change-password" element={<ChangePassword />} />
 
@@ -50,6 +52,9 @@ function App() {
 
             <Route path="/projects" element={<MyProjects />} />
             <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+
+            <Route path="/events" element={<ComingSoon />} />
+            <Route path="/chat" element={<ComingSoon />} />
 
             <Route path="*" element={<NotFound />} />
           </Route>
