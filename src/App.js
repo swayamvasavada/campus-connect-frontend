@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Layout from "./Pages/Layout";
 
@@ -24,6 +25,7 @@ import ProjectDetailPage from "./Pages/Project/ProjectDetailPage";
 import NotFound from "./Pages/NotFound";
 import Dashboard from "./Pages/Dashboard";
 import ComingSoon from "./Pages/Placeholder/ComingSoon";
+import Chat from "./Pages/Chat/Chat";
 
 
 function App() {
@@ -38,9 +40,9 @@ function App() {
         <Route path="/activate/:ACTIVATION_TOKEN" element={<AccountActivation />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route element={<Layout />} >
+          <Route element={<SocketProvider> <Layout /> </SocketProvider>} >
             <Route path="/" element={<Dashboard />} />
-            
+
             <Route path="/change-password" element={<ChangePassword />} />
 
             <Route path="/community" element={<Community />} />
@@ -54,7 +56,7 @@ function App() {
             <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
 
             <Route path="/events" element={<ComingSoon />} />
-            <Route path="/chat" element={<ComingSoon />} />
+            <Route path="/chat" element={<Chat />} />
 
             <Route path="*" element={<NotFound />} />
           </Route>

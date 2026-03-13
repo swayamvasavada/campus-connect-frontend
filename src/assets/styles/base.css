@@ -40,3 +40,47 @@ a:hover {
     text-decoration: underline;
     color: #5eead4;
 }
+
+/* BETA BADGE */
+.beta-badge {
+    background-color: #f59e0b; /* Amber / Warning color */
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: middle;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* --- CUSTOM SCROLLBAR --- */
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #444 #111;
+}
+
+/* Chrome, Edge, and Safari */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111; /* Very dark background for the track */
+    border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #444; /* Subtle grey thumb */
+    border-radius: 5px;
+    border: 2px solid #111; /* Creates a padding effect around the thumb */
+    transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #2dd4bf; /* TEAL color on hover */
+}
