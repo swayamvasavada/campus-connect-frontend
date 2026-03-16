@@ -40,7 +40,7 @@ export function SocketProvider({ children }) {
                 newSocket.close();
             };
         }
-    }, [token, userId]);
+    }, [token, userId, currentUser]);
 
     // Value MUST be an object containing all these properties
     return (

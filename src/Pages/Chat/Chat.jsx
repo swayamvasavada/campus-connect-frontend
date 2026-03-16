@@ -98,7 +98,7 @@ export default function Chat() {
         return () => {
             socket.off('message', handleIncomingMessage);
         };
-    }, [socket, currentChat, currentUser._id, setUnreadCount]);
+    }, [socket, currentChat, currentUser._id, setUnreadCount, loadChats]);
 
 
     // --- 3. Fetch Messages for Active Chat ---
