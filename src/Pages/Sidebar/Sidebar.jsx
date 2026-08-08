@@ -48,12 +48,12 @@ export default function Sidebar({ open, toggleDrawer }) {
                             <span>Clubs</span>
                         </NavLink>
                     </li>
-                    <li>
+                    {/* <li>
                         <NavLink to="/events" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')} onClick={toggleDrawer(false)}>
                             <i className="fa-solid fa-calendar"></i>
                             <span>Events</span>
                         </NavLink>
-                    </li>
+                    </li> */}
                     
                     {/* Chat Link with Inline Badge */}
                     <li>
@@ -62,7 +62,7 @@ export default function Sidebar({ open, toggleDrawer }) {
                                 <div>
                                     <i className="fa-solid fa-comments"></i>
                                     <span>Chat</span>
-                                    <span className="beta-badge" style={{ marginLeft: '8px' }}>BETA</span>
+                                    {/* <span className="beta-badge" style={{ marginLeft: '8px' }}>BETA</span> */}
                                 </div>
                                 {unreadCount > 0 && (
                                     <span className="sidebar-badge">

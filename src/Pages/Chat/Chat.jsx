@@ -22,6 +22,20 @@ export default function Chat() {
     const [isSearching, setIsSearching] = useState(false);
 
     const messagesEndRef = useRef(null);
+    const currentChatRef = useRef(currentChat);
+    useEffect(() => {
+        currentChatRef.current = currentChat;
+    }, [currentChat]);
+
+    // Session storage for saving current active chat user
+    useEffect(() => {
+        if (currentChat?.userDetails?._id) {
+            sessionStorage.setItem('activeChatId', currentChat.userDetails._id);
+        } else {
+            sessionStorage.removeItem('activeChatId');
+        }
+        return () => sessionStorage.removeItem('activeChatId');
+    }, [currentChat]);
 
     // --- 1. Fetch Recent Chats ---
     const loadChats = useCallback(async () => {
@@ -53,9 +67,20 @@ export default function Chat() {
     useEffect(() => {
         if (!socket) return;
 
+        const getStatusWeight = (status) => {
+            if (status === "Seen") return 3;
+            if (status === "Delivered") return 2;
+            if (status === "Sent") return 1;
+            return 0;
+        };
+
+        // 1. Handle New Messages
         const handleIncomingMessage = (msg) => {
-            const isRelatedToCurrentChat = currentChat?.userDetails &&
-                (msg.senderId === currentChat.userDetails._id || msg.receiverId === currentChat.userDetails._id);
+            // FIX: Use the ref to always get the latest chat without re-binding the socket
+            const activeChat = currentChatRef.current;
+
+            const isRelatedToCurrentChat = activeChat?.userDetails &&
+                (msg.senderId === activeChat.userDetails._id || msg.receiverId === activeChat.userDetails._id);
 
             if (isRelatedToCurrentChat) {
                 setMessages((prev) => {
@@ -63,18 +88,24 @@ export default function Chat() {
                     if (exists) return prev;
                     return [...prev, msg];
                 });
-            } else {
+
                 if (msg.senderId !== currentUser._id) {
-                    setUnreadCount(prev => prev + 1);
+                    if (document.visibilityState === 'visible') {
+                        setUnreadCount(prev => Math.max(0, prev - 1));
+                        socket.emit('markMessageSeen', {
+                            senderId: msg.senderId,      // Person who sent it
+                            receiverId: currentUser._id, // You
+                            status: "Seen"
+                        });
+                    }
                 }
             }
 
             setRecentChats((prevChats) => {
                 const otherUserId = msg.senderId === currentUser._id ? msg.receiverId : msg.senderId;
-                const existingChatIndex = prevChats.findIndex(c => c.userDetails?._id === otherUserId);
+                const existingChatIndex = prevChats.findIndex(c => c.userDetails?._id == otherUserId);
 
                 if (existingChatIndex !== -1) {
-                    // Chat exists: Update and move to top
                     let updatedChats = [...prevChats];
                     const chatToUpdate = { ...updatedChats[existingChatIndex] };
                     chatToUpdate.latestMessage = msg;
@@ -87,19 +118,66 @@ export default function Chat() {
                     updatedChats.unshift(chatToUpdate);
                     return updatedChats;
                 } else {
-                    // If chat doesn't exist, re-fetch list from API to get user details
                     loadChats();
                     return prevChats;
                 }
             });
         };
 
+        // 2. Handle Read Receipts / Acknowledgements
+        const handleAcknowledgement = (ackData) => {
+            if (ackData.senderId == currentUser._id) {
+                const incomingWeight = getStatusWeight(ackData.status);
+
+                setMessages(prev => prev.map(msg => {
+                    const isMyMessageToThem = msg.receiverId == ackData.receiverId && msg.senderId == currentUser._id;
+                    if (isMyMessageToThem && incomingWeight > getStatusWeight(msg.status)) {
+                        return { ...msg, status: ackData.status };
+                    }
+                    return msg;
+                }));
+
+                setRecentChats(prevChats => prevChats.map(c => {
+                    if (c.userDetails?._id == ackData.receiverId && c.latestMessage?.senderId == currentUser._id) {
+                        if (incomingWeight > getStatusWeight(c.latestMessage?.status)) {
+                            return { ...c, latestMessage: { ...c.latestMessage, status: ackData.status } };
+                        }
+                    }
+                    return c;
+                }));
+            }
+        };
+
         socket.on('message', handleIncomingMessage);
+        socket.on('acknowledgement', handleAcknowledgement);
+        
+        const handleVisibilityChange = () => {
+            const activeChat = currentChatRef.current;
+            if (document.visibilityState === 'visible' && activeChat) {
+                socket.emit('markMessageSeen', {
+                    senderId: activeChat.userDetails._id,
+                    receiverId: currentUser._id,
+                    status: "Seen"
+                });
+                
+                // Clear local badges
+                setRecentChats(prev => prev.map(c =>
+                    (c?.userDetails?._id || c?.receiver?._id) === activeChat.userDetails._id
+                    ? { ...c, unreadCount: 0 }
+                    : c
+                ));
+            }
+        };
+        socket.on('message', handleIncomingMessage);
+        socket.on('acknowledgement', handleAcknowledgement); 
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
         return () => {
             socket.off('message', handleIncomingMessage);
+            socket.off('acknowledgement', handleAcknowledgement); 
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
         };
-    }, [socket, currentChat, currentUser._id, setUnreadCount, loadChats]);
-
+    }, [socket, currentUser._id, setUnreadCount, loadChats]);
 
     // --- 3. Fetch Messages for Active Chat ---
     useEffect(() => {
@@ -148,6 +226,7 @@ export default function Chat() {
         const messagePayload = {
             _id: messageId,
             senderId: currentUser._id,
+            senderName: currentUser.name,
             receiverId: targetUserId,
             content: newMessage,
             createdAt: new Date().toISOString()
@@ -203,6 +282,14 @@ export default function Chat() {
                     : c
             ));
         }
+
+        if (socket) {
+            socket.emit('markMessageSeen', {
+                senderId: chat.userDetails._id, // Person A (who sent the messages)
+                receiverId: currentUser._id,    // Person B (You, reading them now)
+                status: "Seen"
+            });
+        }
     };
 
     // --- Search Helper ---
@@ -242,11 +329,23 @@ export default function Chat() {
     };
 
     const handleStartNewChat = (user) => {
-        const newChatObj = { userDetails: user, latestMessage: null };
+        const existingChat = recentChats.find(c => (c?.userDetails?._id || c?.receiver?._id) === user._id);
+        const newChatObj = existingChat ? existingChat : { userDetails: user, latestMessage: null, unreadCount: 0 };
+
         setCurrentChat(newChatObj);
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
+
+        // Clear unread count
+        if (existingChat && existingChat.unreadCount > 0) {
+            setUnreadCount(prev => Math.max(0, prev - existingChat.unreadCount));
+            setRecentChats(prev => prev.map(c => (c?.userDetails?._id || c?.receiver?._id) === user._id ? { ...c, unreadCount: 0 } : c));
+        }
+
+        if (socket) {
+            socket.emit('markMessageSeen', { senderId: user._id, receiverId: currentUser._id, status: "Seen" });
+        }
     };
 
     if (loadingRecent) return <div className="chat-container"><p style={{ margin: 'auto' }}>Loading Chats...</p></div>;
@@ -303,7 +402,26 @@ export default function Chat() {
                             return (
                                 <div key={i} className={`message-bubble ${isMe ? "sent" : "received"}`}>
                                     <p>{msg.content}</p>
-                                    <span className="message-time">{formatTime(msg.createdAt)}</span>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+
+                                        {/* Timestamp */}
+                                        <span style={{ fontSize: '0.65rem', color: isMe ? 'rgba(255, 255, 255, 0.75)' : '#9ca3af' }}>
+                                            {formatTime(msg.createdAt)}
+                                        </span>
+
+                                        {/* Status Ticks (Matching your Teal Palette) */}
+                                        {isMe && (
+                                            <span style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', marginLeft: '4px' }}>
+                                                {msg.status === "Seen" ? (
+                                                    <i className="fa-solid fa-check-double" style={{ color: '#3b82f6' }} title="Seen"></i> // Vibrant Blue
+                                                ) : msg.status === "Delivered" ? (
+                                                    <i className="fa-solid fa-check-double" style={{ color: '#9ca3af' }} title="Delivered"></i> // Solid Gray
+                                                ) : (
+                                                    <i className="fa-solid fa-check" style={{ color: '#9ca3af' }} title="Sent"></i> // Solid Gray
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}
